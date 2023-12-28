@@ -1,0 +1,78 @@
+<html>
+    <head>
+        <title>Tutorial of Building a Simple Web Application</title>
+        <script src="https://code.jquery.com/jquery-3.7.1.js" 
+                integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" 
+                crossorigin="anonymous"></script>
+    </head>
+    <body align="center">
+        <h1>{{message}}</h1>
+        <img src="/static/thumbs-up.png" width="100" hight="100"/>
+        <div id="data" align="center"></div>
+        <p>
+        <button id="btn">Show Data</button>
+        <div align="center">
+            <table>
+                <tr>
+                    <td><input id="city_name" placeholder="city name"/></td>
+                    <td><input id="lat" placeholder="lat"/></td>
+                    <td><input id="lng" placeholder="lng"/></td>
+                    <td><input id="country" placeholder="country"/></td>
+                    <td><input id="state" placeholder="state"/></td>
+                    <td><input id="population" placeholder="population"/></td>
+                    <td><button id="btn-append">Append</button></td>
+                </tr>
+            </table>
+        </div>
+    </body>
+    <script>
+        $('document').ready(
+            function(){
+                $('#btn').click(function() {
+                    $.get('/data',  // url
+                        function (data, textStatus, jqXHR) {  // success callback
+                            $('#data').html(data)
+                            $("#data").find("tr").each( function(tr_id, tr_elem){
+                                if (tr_id > 0 && tr_elem.children.length > 1) {
+                                    var city_name = tr_elem.children[1].innerHTML
+                                    buttonStr = '<button class="btn-del" id="btn-del-'+city_name+'">Delete</button>'
+                                    tr_elem.innerHTML += "<td>"+buttonStr+"</td>"
+                                }
+                            });
+                            $('.btn-del').click(function(elem){
+                                var city_name = elem.target.id.split('-')[2]
+                                $.ajax({
+                                    type: "DELETE",
+                                    url: "/data?city_name="+city_name,
+                                    success: function(res) {
+                                        alert(res)
+                                    }
+                                })
+                            })
+                        }
+                    );
+                });
+
+                $('#btn-append').click(function() {
+                    $.ajax({
+                        type: "PUT",
+                        url: "/data",
+                        contentType: "application/json",
+                        data: JSON.stringify({
+                            city_name: $('#city_name').val(),
+                            lat: $("#lat").val(),
+                            lng: $("#lng").val(),
+                            country: $("#country").val(),
+                            state: $("#state").val(),
+                            population: $("#population").val(),
+                        }),
+                        success: function(res) {
+                            alert(res)
+                        }
+                    })
+                });
+            }
+        );
+    </script>
+</html>
+
